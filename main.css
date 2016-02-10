@@ -1,0 +1,51 @@
+body {
+    font: 12px sans-serif;
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+.donate {
+    font-size: 16px;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.button {
+    background-color: #ea504e;
+    padding: .7rem 1.2rem;
+    border-radius: 3px;
+    color: #fff;
+    text-decoration: none;
+}
+
+.logo {
+    color: #F55B5B;
+    display: block;
+    fill: #0076d7;
+    stroke: #8ABFEB;
+    stroke-width: 0;
+    width: 200px;
+}
+
+.line-chart {
+    display: block;
+    margin: 0 auto;
+    font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
