@@ -1,4 +1,4 @@
-var margin = {top: 20, right: 20, bottom: 30, left: 60},
+var margin = {top: 20, right: 20, bottom: 30, left: 100},
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
@@ -20,17 +20,8 @@ var xPlot = function(d) {
     return new Date(d.timestamp);
 };
 
-var lastTotal = 0;
-var yPlot = function(d) {
-    var total = d.total / 100;
-    if (lastTotal === 0)
-        lastTotal = total;
-    var diff = total - lastTotal;
-    lastTotal = total;
-    if(diff < 0)
-        diff = 0;
-
-    return diff;
+var yPlot = function(d) { 
+    return Math.floor(d.total / 100);
 };
 
 var line = d3.svg.line()
@@ -38,77 +29,74 @@ var line = d3.svg.line()
     .y(function(d) { return y(yPlot(d)); });
 
 var svg = d3.select(".line-chart").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 function renderLine(data) {
-  x.domain(d3.extent(data, xPlot));
-  y.domain(d3.extent(data, yPlot));
+    x.domain(d3.extent(data, xPlot));
+    y.domain(d3.extent(data, yPlot));
 
-  lastTotal = 0;
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
 
-  svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
-
-  svg.append("g")
-      .attr("class", "y axis")
-      .call(yAxis)
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis)
     .append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 6)
-      .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .text("Donation ($)");
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text("Donation ($)");
 
-  svg.append("path")
-      .data([data])
-      .attr("class", "line")
-      .attr("d", line);
+    svg.append("path")
+        .data([data])
+        .attr("class", "line")
+        .attr("d", line);
 }
 
 function updateLine(data, duration) {
-  x.domain(d3.extent(data, xPlot))
-  y.domain(d3.extent(data, yPlot));
+    x.domain(d3.extent(data, xPlot));
+    y.domain(d3.extent(data, yPlot));
 
-  lastTotal = 0;
+    var svg = d3.select(".line-chart svg");
 
-  var svg = d3.select(".line-chart svg")
+    svg.select(".x.axis")
+        .transition()
+        .duration(duration)
+        .call(xAxis);
 
-  svg.select(".x.axis")
-    .transition()
-    .duration(duration)
-    .call(xAxis);
+    svg.select(".y.axis")
+        .transition()
+        .duration(duration)
+        .call(yAxis);
 
-  svg.select(".y.axis")
-    .transition()
-    .duration(duration)
-    .call(yAxis);
-
-  svg.select(".line")
-    .data([data])
-    .transition()
-    .duration(duration)
-    .attr("d", line);
+    svg.select(".line")
+        .data([data])
+        .transition()
+        .duration(duration)
+        .attr("d", line);
 }
 
 d3.json("sanders_nh.json", function(error, data) {
-  if (error) throw error;
+    if (error) throw error;
 
-  var start = 0;
-  var cursor = 10;
-  var duration = 100;
-  renderLine(data.slice(start, start+cursor));
+    var start = 0;
+    var cursor = 10;
+    var duration = (20 * 1000) / data.length;
+    renderLine(data.slice(start, start+cursor));
 
-  var intervalTimer = setInterval(function() {
-      if(++cursor > data.length)
-          return clearInterval(intervalTimer);
+    var intervalTimer = setInterval(function() {
+        cursor++;
+        if(cursor > data.length) {
+            return clearInterval(intervalTimer);
+        }
 
-    var records = data.slice(start, start+cursor);
-    updateLine(records, duration);
-  }, duration);
-
+        var records = data.slice(start, start+cursor);
+        updateLine(records, duration);
+    }, duration);
 });
